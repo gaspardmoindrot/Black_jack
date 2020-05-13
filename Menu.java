@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.io.*;
 
 public class Menu
 {
@@ -6,14 +7,43 @@ public class Menu
 	private int nb_players;
 	private String[] name_players;
 	private int[] money;
-	private Standard52Deck deck = new Standard52Deck(0);
-	private DeckOfCards[] player_decks;
-	private DeckOfCards croupier_deck = new DeckOfCards(0);
+	private int[] mise;
+	public Standard52Deck deck = new Standard52Deck(0);
+	public DeckOfCards[] player_decks;
+	public DeckOfCards croupier_deck = new DeckOfCards(0);
 
 	public Menu() {
 		show_menu();
 		load_file();
 		deck.shuffle();
+	}
+
+	public void close_scan() {
+		sc.close();
+	}
+
+	public void set_mise(int i_players, int m) {
+		this.mise[i_players] = m;
+	}
+
+	public int get_mise(int i_players) {
+		return (this.mise[i_players]);
+	}
+
+	public String get_name(int i_players) {
+		return (this.name_players[i_players]);
+	}
+
+	public int get_money(int i_players) {
+		return (this.money[i_players]);
+	}
+
+	public void set_money(int i_players, int money_2) {
+		this.money[i_players] = money_2;
+	}
+
+	public int get_nb_players() {
+		return (this.nb_players);
 	}
 
 	private void load_file() {
@@ -25,7 +55,7 @@ public class Menu
 			i = sc.nextInt();
 			if (i == 1 || i == 0) {
 				if (i == 1)
-					; // ecrire le code ici /!\
+					load_with_file();
 				else {
 					System.out.print("How many players are going to play ? (1-4) : ");
 					while (true) {
@@ -44,6 +74,7 @@ public class Menu
 					}
 					System.out.print("Players starts with how much money ? (1-400) : ");
 					money = new int[this.nb_players];
+					mise = new int[this.nb_players];
 					while (true) {
 						i = sc.nextInt();
 						if (i > 0 && i < 401) break;
@@ -54,13 +85,85 @@ public class Menu
 						player_decks[j] = new DeckOfCards(0);
 						j++;
 					}
-					System.out.println("The game will start soon !");
+					System.out.println("The game will start soon !\n");
 				}
 				break;
 			}
 			else
 				System.out.print("Please type 0 or 1 : ");
 		}
+	}
+
+	private void load_with_file() {
+		sc.nextLine();
+		try {
+			String str;
+			String line;
+			String mdp;
+			String decrypt;
+			int i = 0;
+
+			System.out.println("Which file do you want to load ? : ");
+			str = sc.nextLine();
+			System.out.println("What is the password ? : ");
+			mdp = sc.nextLine();
+			File f = new File(str);
+			if(f.isFile()) {
+				BufferedReader br = new BufferedReader(new FileReader(str));
+				line = br.readLine();
+				decrypt = check_op_code(line, mdp);
+				if (decrypt.equals("isepcvutISEP")) {
+					line = br.readLine();
+					line = br.readLine();
+					this.nb_players = Integer.parseInt(check_op_code(line, mdp));
+					line = br.readLine();
+					line = br.readLine();
+					this.name_players = new String[this.nb_players];
+					this.money = new int[this.nb_players];
+					while (i < this.nb_players) {
+						this.name_players[i] = check_op_code(line, mdp);
+						line = br.readLine();
+						this.money[i] = Integer.parseInt(check_op_code(line, mdp));
+						line = br.readLine();
+						i++;
+					}
+					this.player_decks = new DeckOfCards[this.nb_players];
+					this.mise = new int[this.nb_players];
+					i = 0;
+					while (i < this.nb_players) {
+						this.player_decks[i] = new DeckOfCards(0);
+						i++;
+					}
+					System.out.println("The game will start soon !\n");
+				}
+				else {
+					System.out.println("Wrong password or file");
+					load_with_file();
+				}
+			}
+			else {
+				System.out.println("Wrong file, try again");
+				load_with_file();
+			}
+		}
+		catch (Exception e) {
+			System.out.println("There is a problem !");
+		}
+	}
+
+	private String check_op_code(String line, String mdp) {
+		char data[] = new char[line.length()];
+		int h;
+		int i = 0;
+		String str;
+
+		while (i < line.length()) {
+			h = (int)line.charAt(i) - (int)mdp.charAt(i % mdp.length());
+			data[i] = (char)h;
+			i++;
+		}
+		str = new String(data);
+		return (str);
 	}
 
 	private void show_menu() {

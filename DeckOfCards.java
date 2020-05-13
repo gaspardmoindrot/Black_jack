@@ -28,7 +28,7 @@ interface ManipulableDeck {
 
 public class DeckOfCards implements CleverDeck, ManipulableDeck
 {
-	protected int NB_CARDS;
+	public int NB_CARDS;
 	protected Card[] mCard;
 
 	public DeckOfCards(int nb_cards) {
@@ -37,11 +37,15 @@ public class DeckOfCards implements CleverDeck, ManipulableDeck
 		NB_CARDS = nb_cards;
 		mCard = new Card[NB_CARDS];
 		Random random = new Random();
-		
+
 		while (i < NB_CARDS) {
 			mCard[i] = new Card(random.nextInt(13) + 1, random.nextInt(4) + 1);
 			i++;
 		}
+	}
+
+	public Card getter_top_card() {
+		return (mCard[NB_CARDS - 1]);
 	}
 
 	public Card getter_card(int index) {
@@ -57,12 +61,45 @@ public class DeckOfCards implements CleverDeck, ManipulableDeck
 			mCard[index] = card;
 	}
 
+	public int calcul_total_cards() {
+		int i = 0;
+		int total = 0;
+
+		while (i < NB_CARDS) {
+			if (mCard[i].get_rank() >= 10)
+				total += 10;
+			else if (mCard[i].get_rank() == 1)
+				total += 11;
+			else
+				total += mCard[i].get_rank();
+			i++;
+		}
+		if (total > 21) {
+			i = 0;
+			total = 0;
+			while (i < NB_CARDS) {
+				if (mCard[i].get_rank() >= 10)
+					total += 10;
+				else
+					total += mCard[i].get_rank();
+				i++;
+			}
+		}
+		return (total);
+	}
+
 	public void print() {
 		int i = 0;
 
 		while (i < NB_CARDS) {
 			if (mCard[i].get_suit() == "joker")
 				System.out.println("joker");
+			else if (mCard[i].get_rank() == 11)
+				System.out.println("Jack" + " of " + mCard[i].get_suit());
+			else if (mCard[i].get_rank() == 12)
+				System.out.println("Queen" + " of " + mCard[i].get_suit());
+			else if (mCard[i].get_rank() == 13)
+				System.out.println("King" + " of " + mCard[i].get_suit());
 			else
 				System.out.println(mCard[i].get_rank() + " of " + mCard[i].get_suit());
 			i++;
